@@ -1,0 +1,18 @@
+.login-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card {
+  width: min(420px, 100%);
+  border-radius: 16px;
+}
+
+.login-space {
+  width: 100%;
+}
+
+.login-title {
+  margin-bottom: 4px;
+}

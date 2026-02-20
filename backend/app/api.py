@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+
+from .routers import auth, health
 
 app = FastAPI()
 
@@ -14,7 +15,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.get("/health", tags=["health"])
-async def health() -> dict:
-    return {"status": "ok"}
+app.include_router(health.router)
+app.include_router(auth.router)

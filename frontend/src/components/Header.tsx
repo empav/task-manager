@@ -1,10 +1,24 @@
 import logo from "../assets/logo.svg";
 import { useHealthQuery } from "../hooks";
-import { Avatar, Badge, Layout, Space, Spin, Typography } from "antd";
+import { Avatar, Badge, Button, Layout, Space, Spin, Typography } from "antd";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+
 import "./Header.css";
 
 export default function Header() {
+  const navigate = useNavigate();
   const { status, data, error } = useHealthQuery();
+
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    Boolean(localStorage.getItem("auth_token")),
+  );
+
+  const onLogout = () => {
+    localStorage.removeItem("auth_token");
+    setIsAuthenticated(false);
+    navigate("/login", { replace: true });
+  };
 
   const health =
     status === "pending"
@@ -26,11 +40,11 @@ export default function Header() {
         : "Backend offline";
 
   return (
-    <Layout.Header className="app-header">
+    <Layout.Header className="header-content">
       <Space align="center" size="middle">
         <Avatar size={64} src={logo} shape="square" />
         <div>
-          <Typography.Title level={4} className="app-header-title">
+          <Typography.Title level={4} className="header-title">
             Task Manager
           </Typography.Title>
           <Typography.Text type="secondary">
@@ -38,13 +52,18 @@ export default function Header() {
           </Typography.Text>
         </div>
       </Space>
-      <Space align="center" size="small" aria-live="polite">
+      <Space align="center" size="middle">
         {health === "loading" ? (
           <Spin size="small" />
         ) : (
           <Badge status={badgeStatus} />
         )}
         <Typography.Text>{healthLabel}</Typography.Text>
+        {isAuthenticated && (
+          <Button variant="outlined" onClick={onLogout}>
+            Logout
+          </Button>
+        )}
       </Space>
     </Layout.Header>
   );
