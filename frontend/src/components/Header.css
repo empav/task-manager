@@ -1,0 +1,11 @@
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  line-height: normal;
+}
+
+.app-header .app-header-title.ant-typography {
+  margin-bottom: 0;
+}
