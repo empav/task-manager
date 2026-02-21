@@ -21,7 +21,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const existingToken = localStorage.getItem("auth_token");
+    const existingToken = sessionStorage.getItem("auth_token");
     if (existingToken) {
       navigate("/home", { replace: true });
     }
@@ -31,7 +31,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       const data = await login(values);
-      localStorage.setItem("auth_token", data.token);
+      sessionStorage.setItem("auth_token", data.token);
       message.success("Login successful");
       form.resetFields(["password"]);
       navigate("/home", { replace: true });

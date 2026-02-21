@@ -11,11 +11,11 @@ export default function Header() {
   const { status, data, error } = useHealthQuery();
 
   const [isAuthenticated, setIsAuthenticated] = useState(
-    Boolean(localStorage.getItem("auth_token")),
+    Boolean(sessionStorage.getItem("auth_token")),
   );
 
   const onLogout = () => {
-    localStorage.removeItem("auth_token");
+    sessionStorage.removeItem("auth_token");
     setIsAuthenticated(false);
     navigate("/login", { replace: true });
   };
