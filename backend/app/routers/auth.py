@@ -1,3 +1,4 @@
+import hashlib
 import hmac
 import os
 from datetime import datetime, timezone
@@ -12,6 +13,7 @@ JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 
 AUTH_USERNAME = os.getenv("AUTH_USERNAME", "admin")
 AUTH_PASSWORD = os.getenv("AUTH_PASSWORD", "admin")
+AUTH_PASSWORD_HASH = hashlib.sha256(AUTH_PASSWORD.encode("utf-8")).hexdigest()
 
 
 def create_access_token(subject: str) -> str:
@@ -28,7 +30,7 @@ def create_access_token(subject: str) -> str:
 async def login(payload: LoginRequest) -> TokenResponse:
     if not (
         hmac.compare_digest(payload.username, AUTH_USERNAME)
-        and hmac.compare_digest(payload.password, AUTH_PASSWORD)
+        and hmac.compare_digest(payload.password, AUTH_PASSWORD_HASH)
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
