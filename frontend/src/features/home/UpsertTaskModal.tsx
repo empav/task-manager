@@ -1,37 +1,64 @@
 import { Form, Input, Modal, Select } from "antd";
+import { useEffect } from "react";
 import { TASK_STATUS_OPTIONS } from "../../types";
 import type { TaskCreate } from "../../types";
 
-type CreateTaskModalProps = {
+type UpsertTaskModalProps = {
   open: boolean;
   isLoading: boolean;
   onCancel: () => void;
-  onCreate: (values: TaskCreate) => void;
+  onSubmit: (values: TaskCreate) => void | Promise<void>;
+  mode?: "create" | "edit";
+  initialValues?: Partial<TaskCreate>;
 };
 
-export default function CreateTaskModal({
+export default function UpsertTaskModal({
   open,
   isLoading,
   onCancel,
-  onCreate,
-}: CreateTaskModalProps) {
+  onSubmit,
+  mode = "create",
+  initialValues,
+}: UpsertTaskModalProps) {
   const [form] = Form.useForm<TaskCreate>();
+  const isEditMode = mode === "edit";
+
+  useEffect(() => {
+    if (!open) return;
+    if (isEditMode) {
+      form.setFieldsValue({
+        title: initialValues?.title ?? "",
+        description: initialValues?.description ?? undefined,
+        status: initialValues?.status ?? "Open",
+      });
+      return;
+    }
+
+    form.resetFields();
+    form.setFieldsValue({
+      status: "Open",
+      ...initialValues,
+    });
+  }, [form, initialValues, isEditMode, open]);
 
   return (
     <Modal
-      title="Create task"
+      title={isEditMode ? "Edit task" : "Create task"}
       open={open}
       onCancel={onCancel}
       onOk={() => {
         form
           .validateFields()
-          .then((values) => {
-            onCreate(values);
-            form.resetFields();
-          })
+          .then((values) =>
+            Promise.resolve(onSubmit(values)).then(() => {
+              if (!isEditMode) {
+                form.resetFields();
+              }
+            }),
+          )
           .catch(() => null);
       }}
-      okText="Create"
+      okText={isEditMode ? "Save" : "Create"}
       confirmLoading={isLoading}
       destroyOnHidden
     >
@@ -39,7 +66,6 @@ export default function CreateTaskModal({
         form={form}
         layout="vertical"
         requiredMark={false}
-        initialValues={{ status: "Open" }}
       >
         <Form.Item
           label="Title"

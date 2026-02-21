@@ -1,5 +1,6 @@
 import { Layout } from "antd";
 import Header from "./Header";
+import TaskTable from "./TaskTable";
 import Title from "./Title";
 import "./Home.css";
 import { useCountTasksQuery } from "../../hooks";
@@ -9,10 +10,14 @@ export default function Home() {
 
   return (
     <Layout.Content className="home-content">
-      <Header />
-      <div className="home-main">
-        {!isLoading && taskCount === 0 ? <Title taskCount={taskCount} /> : null}
-      </div>
+      {!isLoading ? (
+        <>
+          <Header />
+          <Layout.Content className="home-main">
+            {taskCount === 0 ? <Title taskCount={taskCount} /> : <TaskTable />}
+          </Layout.Content>
+        </>
+      ) : null}
     </Layout.Content>
   );
 }

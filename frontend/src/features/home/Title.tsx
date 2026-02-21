@@ -1,6 +1,6 @@
 import { Button, Typography, message } from "antd";
 import type { ApiError, TaskCreate } from "../../types";
-import CreateTaskModal from "./CreateTaskModal";
+import UpsertTaskModal from "./UpsertTaskModal";
 import "./Title.css";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -46,11 +46,11 @@ export default function Title({
           </Typography.Title>
         </>
       ) : null}
-      <CreateTaskModal
+      <UpsertTaskModal
         open={isCreateModalOpen}
         isLoading={createTaskMutation.isPending}
         onCancel={() => setIsCreateModalOpen(false)}
-        onCreate={onCreate}
+        onSubmit={onCreate}
       />
     </>
   );
