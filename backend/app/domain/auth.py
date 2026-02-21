@@ -8,5 +8,5 @@ class LoginRequest(BaseModel):
     password: Annotated[str, StringConstraints(min_length=4, max_length=128)]
 
 
-class TokenResponse(BaseModel):
+class LoginResponse(BaseModel):
     token: str

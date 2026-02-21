@@ -1,4 +1,3 @@
-import hashlib
 import hmac
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, status
@@ -9,7 +8,7 @@ from ..config import (
     JWT_ALGORITHM,
     JWT_SECRET,
 )
-from ..schemas.auth import LoginRequest, TokenResponse
+from ..domain.auth import LoginRequest, LoginResponse
 
 router = APIRouter()
 
@@ -24,8 +23,8 @@ def create_access_token(subject: str) -> str:
     return token
 
 
-@router.post("/auth/login", response_model=TokenResponse, tags=["auth"])
-async def login(payload: LoginRequest) -> TokenResponse:
+@router.post("/auth/login", response_model=LoginResponse, tags=["auth"])
+async def login(payload: LoginRequest) -> LoginResponse:
     if not (
         hmac.compare_digest(payload.username, AUTH_USERNAME)
         and hmac.compare_digest(payload.password, AUTH_PASSWORD_HASH)
@@ -36,6 +35,6 @@ async def login(payload: LoginRequest) -> TokenResponse:
         )
 
     token = create_access_token(payload.username)
-    return TokenResponse(
+    return LoginResponse(
         token=token,
     )

@@ -1,3 +1,6 @@
 fastapi
 uvicorn[standard]
 python-jose[cryptography]
+sqlmodel
+python-dotenv
+psycopg2-binary

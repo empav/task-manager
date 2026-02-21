@@ -1,9 +1,18 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routers import auth, health
+from .db import create_db_and_tables, engine
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    yield
+    engine.dispose()
+
+
+app = FastAPI(lifespan=lifespan)
 
 origins = ["http://localhost:5173", "localhost:5173"]
 

@@ -4,14 +4,16 @@ services:
     container_name: task-manager-postgres
     ports:
       - "5432:5432"
+    env_file:
+      - ./backend/.env
     environment:
-      POSTGRES_DB: task_manager
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: ${POSTGRES_DB?err}
+      POSTGRES_USER: ${POSTGRES_USER?err}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?err}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d task_manager"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER?err} -d ${POSTGRES_DB?err}"]
       interval: 5s
       timeout: 5s
       retries: 5
