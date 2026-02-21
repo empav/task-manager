@@ -28,6 +28,7 @@ docker compose --env-file backend/.env up --build
 
 ```bash
 cd backend
+# Could be python3 -m venv .venv if you have python3 installed
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -36,15 +37,21 @@ cd ../frontend
 npm ci
 ```
 
-2. Create the backend environment file (see Environment variables below).
-3. Start the backend:
+2. Create the backend/frontend environment file (see Environment variables below).
+3. In a terminal, start a postgresql database
+
+```bash
+docker compose --env-file backend/.env up postgres
+```
+
+4. In another terminal, start the backend:
 
 ```bash
 cd backend
 python main.py
 ```
 
-4. In another terminal, start the frontend:
+5. In another terminal, start the frontend:
 
 ```bash
 cd frontend
@@ -98,14 +105,16 @@ Notes:
 
 Assumptions:
 
-- The backend is a python-based fastAPI service. He needs to be run inside a venv.
-- The frontend is a React app served via `npm run dev`.
-- PostgreSQL is used as database when running the app.
+- PostgreSQL is used as database when running the app. Make sure you run it using docker compose from the project's root (`docker compose --env-file backend/.env up postgres`) before running the backend.
+- The backend is a python-based fastAPI service. Make sure you install python and create a venv (for instance running `python3 -m venv .venv` does it). As soon as you run it `python main.py` it creates an empty task table. That's for ease of development.
+- The frontend is a React app served via `npm run dev`. Make sure you have node and npm installed (for instance node>=22 and npm>=11).
 
 Possible improvements:
 
-- Add authentication, user table, jwt with database and user-specific task lists.
-- Possibly add social logins using OAuth2.
+- Improve FE bundle size using dynamic import() to code-split the application.
+- Secure APIs validating token from request headers.
+- Maybe authentication against database creating a users table or possibly adding social login using OAuth2.
 - Add pagination, filtering, and search server-side. At the moment those are handled by ant client-side.
-- Add production build instructions and deployment manifests.
+- At the moment db migrations are not handled cause there's only one table. Evaluate another framework in place of `sqlmodel` to handle them.
 - Add API documentation (OpenAPI/Swagger).
+- Add production build instructions and deployment manifests.
