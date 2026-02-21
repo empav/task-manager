@@ -1,5 +1,5 @@
-import logo from "../assets/logo.svg";
-import { useHealthQuery } from "../hooks";
+import logo from "../../assets/logo.svg";
+import { useHealthQuery } from "../../hooks";
 import { Avatar, Badge, Button, Layout, Space, Spin, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";

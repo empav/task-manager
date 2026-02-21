@@ -1,7 +1,7 @@
 import { Layout } from "antd";
 import { Navigate, Route, Routes } from "react-router-dom";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
+import Login from "./features/login/Login";
+import Home from "./features/home/Home";
 
 import "./App.css";
 

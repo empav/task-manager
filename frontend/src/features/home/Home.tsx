@@ -1,12 +1,15 @@
-import { Layout, Typography } from "antd";
-import Header from "../components/Header";
+import { Layout } from "antd";
+import Header from "./Header";
+import Title from "./Title";
 import "./Home.css";
 
 export default function Home() {
   return (
     <Layout.Content className="home-content">
       <Header />
-      <Typography.Text type="secondary">Home</Typography.Text>
+      <div className="home-main">
+        <Title />
+      </div>
     </Layout.Content>
   );
 }

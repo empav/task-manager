@@ -10,8 +10,8 @@ import {
 } from "antd";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api";
-import type { ApiError, LoginRequest } from "../types";
+import { login } from "../../api";
+import type { ApiError, LoginRequest } from "../../types";
 
 import "./Login.css";
 

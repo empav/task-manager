@@ -14,7 +14,8 @@ export type ApiError = {
   message: string[];
 };
 
-export type TaskStatus = "Open" | "In Progress" | "Done";
+export const TASK_STATUS_OPTIONS = ["Open", "In Progress", "Done"] as const;
+export type TaskStatus = (typeof TASK_STATUS_OPTIONS)[number];
 
 export type TaskCreate = {
   title: string;

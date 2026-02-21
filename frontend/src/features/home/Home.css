@@ -1,0 +1,11 @@
+.home-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
