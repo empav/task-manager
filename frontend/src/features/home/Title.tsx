@@ -1,37 +1,21 @@
 import { Button, Typography, message } from "antd";
-import { useEffect, useState } from "react";
-import { countTasks, createTask } from "../../api";
+import { createTask } from "../../api";
 import type { ApiError, TaskCreate } from "../../types";
 import CreateTaskModal from "./CreateTaskModal";
 import "./Title.css";
+import { useState } from "react";
 
 type TitleProps = {
+  taskCount: number;
   onTaskCreated?: () => void;
 };
 
-export default function Title({ onTaskCreated = () => {} }: TitleProps) {
+export default function Title({
+  taskCount,
+  onTaskCreated = () => {},
+}: TitleProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [taskCount, setTaskCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    countTasks()
-      .then((count) => {
-        if (active) {
-          setTaskCount(count);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setTaskCount(null);
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const onCreate = async (values: TaskCreate) => {
     try {
