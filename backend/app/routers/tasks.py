@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from ..db import get_db
@@ -46,6 +47,13 @@ def list_tasks(
     query = select(TaskModel)
     tasks = session.exec(query).all()
     return tasks
+
+
+@router.get("/tasks/count", response_model=int, tags=["tasks"])
+def count_tasks(session: Session = Depends(get_db)) -> int:
+    query = select(func.count()).select_from(TaskModel)
+    count = session.exec(query).one()
+    return int(count)
 
 
 @router.get("/tasks/{task_id}", response_model=TaskRead, tags=["tasks"])
