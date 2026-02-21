@@ -11,15 +11,10 @@ export async function login(request: LoginRequest): Promise<LoginResponse> {
     body: JSON.stringify(payload),
   });
 
+  const data = await res.json();
   if (!res.ok) {
-    const contentType = res.headers.get("content-type") || "";
-    if (contentType.includes("application/json")) {
-      const data = await res.json();
-      throw data;
-    }
-    const message = await res.text();
-    throw new Error(message || "Login failed");
+    throw { status_code: res.status, message: data.message ?? "Login failed" };
   }
 
-  return res.json();
+  return data;
 }

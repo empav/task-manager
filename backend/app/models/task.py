@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Enum as SAEnum, Integer
 from sqlmodel import Field, SQLModel
 
 
@@ -21,6 +21,9 @@ class Task(SQLModel, table=True):
     )
     title: str
     description: Optional[str] = None
-    status: TaskStatus = TaskStatus.OPEN
+    status: TaskStatus = Field(
+        default=TaskStatus.OPEN,
+        sa_column=Column(SAEnum(TaskStatus), nullable=False),
+    )
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)

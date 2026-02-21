@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../api";
-import type { LoginError, LoginRequest } from "../types";
+import type { ApiError, LoginRequest } from "../types";
 
 import "./Login.css";
 
@@ -37,8 +37,8 @@ export default function LoginPage() {
       navigate("/home", { replace: true });
     } catch (err) {
       console.error("Login error:", err);
-      const error = err as LoginError;
-      message.error(error.detail || "Login failed");
+      const error = err as ApiError;
+      message.error(error.message.join(", "));
     } finally {
       setIsSubmitting(false);
     }
@@ -47,7 +47,7 @@ export default function LoginPage() {
   return (
     <Layout.Content className="login-content">
       <Card className="login-card">
-        <Space direction="vertical" size="large" className="login-space">
+        <Space orientation="vertical" size="large" className="login-space">
           <div>
             <Typography.Title level={3} className="login-title">
               Sign in
