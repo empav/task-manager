@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../api";
-import type { LoginRequest } from "../types";
+import type { LoginError, LoginRequest } from "../types";
 
 import "./Login.css";
 
@@ -36,8 +36,9 @@ export default function LoginPage() {
       form.resetFields(["password"]);
       navigate("/home", { replace: true });
     } catch (err) {
-      const error = err as Error;
-      message.error(error.message || "Login failed");
+      console.error("Login error:", err);
+      const error = err as LoginError;
+      message.error(error.detail || "Login failed");
     } finally {
       setIsSubmitting(false);
     }

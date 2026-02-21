@@ -8,3 +8,7 @@ export type LoginRequest = {
 export type LoginResponse = {
   token: string;
 };
+
+export type LoginError = {
+  detail?: string;
+};

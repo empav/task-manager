@@ -1,9 +1,11 @@
-from pydantic import BaseModel
+from typing import Annotated
+
+from pydantic import BaseModel, StringConstraints
 
 
 class LoginRequest(BaseModel):
-    username: str
-    password: str
+    username: Annotated[str, StringConstraints(min_length=3, max_length=50)]
+    password: Annotated[str, StringConstraints(min_length=4, max_length=128)]
 
 
 class TokenResponse(BaseModel):
