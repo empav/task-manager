@@ -8,17 +8,17 @@ import {
   Typography,
   message,
 } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../../api";
 import type { ApiError, LoginRequest } from "../../types";
+import { useLoginMutation } from "../../hooks";
 
 import "./Login.css";
 
 export default function LoginPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form] = Form.useForm<LoginRequest>();
   const navigate = useNavigate();
+  const loginMutation = useLoginMutation();
 
   useEffect(() => {
     const existingToken = sessionStorage.getItem("auth_token");
@@ -28,9 +28,8 @@ export default function LoginPage() {
   }, [navigate]);
 
   const onFinish = async (values: LoginRequest) => {
-    setIsSubmitting(true);
     try {
-      const data = await login(values);
+      const data = await loginMutation.mutateAsync(values);
       sessionStorage.setItem("auth_token", data.token);
       message.success("Login successful");
       form.resetFields(["password"]);
@@ -39,8 +38,6 @@ export default function LoginPage() {
       console.error("Login error:", err);
       const error = err as ApiError;
       message.error(error.message.join(", "));
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -83,7 +80,7 @@ export default function LoginPage() {
             <Button
               type="primary"
               htmlType="submit"
-              loading={isSubmitting}
+              loading={loginMutation.isPending}
               block
             >
               Sign in

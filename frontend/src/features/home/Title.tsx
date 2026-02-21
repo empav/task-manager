@@ -1,9 +1,10 @@
 import { Button, Typography, message } from "antd";
-import { createTask } from "../../api";
 import type { ApiError, TaskCreate } from "../../types";
 import CreateTaskModal from "./CreateTaskModal";
 import "./Title.css";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCreateTaskMutation } from "../../hooks";
 
 type TitleProps = {
   taskCount: number;
@@ -15,12 +16,13 @@ export default function Title({
   onTaskCreated = () => {},
 }: TitleProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const createTaskMutation = useCreateTaskMutation();
+  const queryClient = useQueryClient();
 
   const onCreate = async (values: TaskCreate) => {
     try {
-      setIsLoading(true);
-      await createTask(values);
+      await createTaskMutation.mutateAsync(values);
+      await queryClient.invalidateQueries({ queryKey: ["tasks", "count"] });
       message.success("Task created");
       setIsCreateModalOpen(false);
       onTaskCreated();
@@ -29,8 +31,6 @@ export default function Title({
       message.error(
         error?.message?.join(", ") ?? "An unexpected error occurred.",
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -48,7 +48,7 @@ export default function Title({
       ) : null}
       <CreateTaskModal
         open={isCreateModalOpen}
-        isLoading={isLoading}
+        isLoading={createTaskMutation.isPending}
         onCancel={() => setIsCreateModalOpen(false)}
         onCreate={onCreate}
       />
