@@ -105,7 +105,8 @@ Notes:
 
 Assumptions:
 
-- PostgreSQL is used as database when running the app. Make sure you run it using docker compose from the project's root (`docker compose --env-file backend/.env up postgres`) before running the backend.
+- Only one user to test the app. Auth is simple for the sake of the this test. user/pwd have to be configured using backend/.env AUTH_USERNAME/AUTH_PASSWORD vars.
+- PostgreSQL is used as database when running the app. Make sure you run it using either docker compose from the project's root (`docker compose --env-file backend/.env up postgres`) or hosting the db elsewhere before running the backend.
 - The backend is a python-based fastAPI service. Make sure you install python and create a venv (for instance running `python3 -m venv .venv` does it). As soon as you run it `python main.py` it creates an empty task table. That's for ease of development.
 - The frontend is a React app served via `npm run dev`. Make sure you have node and npm installed (for instance node>=22 and npm>=11).
 
@@ -113,8 +114,9 @@ Possible improvements:
 
 - Improve FE bundle size using dynamic import() to code-split the application.
 - Secure APIs validating token from request headers.
-- Maybe authentication against database creating a users table or possibly adding social login using OAuth2.
-- Add pagination, filtering, and search server-side. At the moment those are handled by ant client-side.
+- Enhance authentication using a user table in the database or possibly adding social login using OAuth2.
+- Add pagination, filtering, and search server-side. At the moment those are handled by ant design by client-side.
 - At the moment db migrations are not handled cause there's only one table. Evaluate another framework in place of `sqlmodel` to handle them.
 - Add API documentation (OpenAPI/Swagger).
 - Add production build instructions and deployment manifests.
+- Add integration tests in the backend against a db in memory like sqlLite or similar.
