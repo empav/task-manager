@@ -26,6 +26,3 @@ class TaskRead(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-
-class TaskDelete(BaseModel):
-    id: int

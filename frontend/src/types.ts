@@ -37,7 +37,3 @@ export type TaskRead = {
   created_at: string;
   updated_at: string;
 };
-
-export type TaskDelete = {
-  id: number;
-};
