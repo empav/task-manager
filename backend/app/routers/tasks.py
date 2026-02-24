@@ -132,13 +132,27 @@ def apply_update(task: TaskModel, payload: TaskUpdate) -> TaskModel:
 
 @router_v1.patch("/tasks/{task_id}", response_model=TaskRead, tags=["tasks"])
 def patch_task(
-    task_id: int, payload: TaskUpdate, session: Session = Depends(get_db)
+    task_id: int,
+    payload: TaskUpdate,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_db),
 ) -> TaskModel:
     task = get_task_or_404(session, task_id)
     task = apply_update(task, payload)
     session.add(task)
     session.commit()
     session.refresh(task)
+    background_tasks.add_task(
+        write_audit_log,
+        AuditAction.TASK_UPDATED,
+        actor=AUTH_USERNAME,
+        payload={
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "status": task.status.value,
+        },
+    )
     return task
 
 
@@ -147,8 +161,23 @@ def patch_task(
     status_code=status.HTTP_204_NO_CONTENT,
     tags=["tasks"],
 )
-def delete_task(task_id: int, session: Session = Depends(get_db)) -> None:
+def delete_task(
+    task_id: int,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_db),
+) -> None:
     task = get_task_or_404(session, task_id)
     session.delete(task)
     session.commit()
+    background_tasks.add_task(
+        write_audit_log,
+        AuditAction.TASK_DELETED,
+        actor=AUTH_USERNAME,
+        payload={
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "status": task.status.value,
+        },
+    )
     return None
