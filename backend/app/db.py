@@ -1,5 +1,6 @@
 from sqlmodel import Session, SQLModel, create_engine
 
+from .models.audit_log import AuditLog
 from .config import DATABASE_URL
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)

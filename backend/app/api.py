@@ -1,12 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from . import logging as _logging
 from .routers import auth, health, tasks
 from .handlers import register_exception_handlers
 from .lifespan import lifespan
+from .middleware import audit_http_requests
 
 app = FastAPI(lifespan=lifespan)
 register_exception_handlers(app)
+
+app.middleware("http")(audit_http_requests)
 
 app.add_middleware(
     CORSMiddleware,

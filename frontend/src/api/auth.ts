@@ -19,3 +19,9 @@ export async function login(request: LoginRequest): Promise<LoginResponse> {
 
   return data;
 }
+
+export async function logout(): Promise<void> {
+  await fetch(`${BASE_URL}/v1/auth/logout`, {
+    method: "POST",
+  });
+}
