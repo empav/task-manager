@@ -1,16 +1,20 @@
 from datetime import datetime
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy import func
 from sqlmodel import Session, select
 
+from ..audit import write_audit_log
+from ..config import AUTH_USERNAME
 from ..db import get_db
 from ..domain.task import TaskCreate, PaginatedTaskListResponse, TaskRead, TaskUpdate
+from ..domain.audit import AuditAction
 from ..models.task import Task as TaskModel
 
 router_v1 = APIRouter()
 router_v2 = APIRouter()
+
 
 def get_task_or_404(session: Session, task_id: int) -> TaskModel:
     task = session.get(TaskModel, task_id)
@@ -27,7 +31,11 @@ def get_task_or_404(session: Session, task_id: int) -> TaskModel:
     status_code=status.HTTP_201_CREATED,
     tags=["tasks"],
 )
-def create_task(payload: TaskCreate, session: Session = Depends(get_db)) -> TaskModel:
+def create_task(
+    payload: TaskCreate,
+    background_tasks: BackgroundTasks,
+    session: Session = Depends(get_db),
+) -> TaskModel:
     now = datetime.now()
     task = TaskModel(
         title=payload.title,
@@ -39,6 +47,18 @@ def create_task(payload: TaskCreate, session: Session = Depends(get_db)) -> Task
     session.add(task)
     session.commit()
     session.refresh(task)
+    
+    background_tasks.add_task(
+        write_audit_log,
+        AuditAction.TASK_CREATED,
+        actor=AUTH_USERNAME,
+        payload={
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "status": task.status.value,
+        },
+    )
     return task
 
 
