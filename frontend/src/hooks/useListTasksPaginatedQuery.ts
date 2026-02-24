@@ -14,6 +14,7 @@ export function useListTasksPaginatedQuery(params: PaginatedTaskListRequest) {
       params.pageSize,
       params.title ?? "",
       params.description ?? "",
+      params.status ?? "",
     ],
     queryFn: () =>
       listTasksPaginated(params) as Promise<PaginatedTaskListResponse>,

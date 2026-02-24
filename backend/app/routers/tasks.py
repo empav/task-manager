@@ -57,6 +57,7 @@ def list_tasks_v2(
     page_size: int = Query(5, ge=1, le=100),
     title: Optional[str] = Query(default=None, min_length=1),
     description: Optional[str] = Query(default=None, min_length=1),
+    status: Optional[str] = Query(default=None, min_length=1),
     session: Session = Depends(get_db),
 ) -> PaginatedTaskListResponse:
     offset = (page - 1) * page_size
@@ -66,9 +67,11 @@ def list_tasks_v2(
         query = query.where(TaskModel.title.contains(title))
     if description:
         query = query.where(TaskModel.description.contains(description))
+    if status:
+        query = query.where(TaskModel.status == status)
     query = query.offset(offset).limit(page_size)
     rows = session.exec(query).all()
-    total = int(rows[0][1]) if rows else 0
+    total = int(rows[0].total) if rows else 0
     tasks = [row[0] for row in rows]
     items = [
         TaskRead(

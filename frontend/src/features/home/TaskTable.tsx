@@ -2,7 +2,13 @@ import { Button, Popconfirm, Table, Tooltip, message } from "antd";
 import type { TableProps } from "antd";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ApiError, TaskCreate, TaskRead } from "../../types";
+import {
+  TASK_STATUS_OPTIONS,
+  type ApiError,
+  type TaskCreate,
+  type TaskRead,
+  type TaskStatus,
+} from "../../types";
 import {
   useCreateTaskMutation,
   useDeleteTaskMutation,
@@ -19,11 +25,13 @@ export default function TaskTable() {
   const [pageSize, setPageSize] = useState(TASK_TABLE_PAGE_SIZE);
   const [titleFilter, setTitleFilter] = useState<string>("");
   const [descriptionFilter, setDescriptionFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<TaskStatus>();
   const { data, isLoading } = useListTasksPaginatedQuery({
     page: currentPage,
     pageSize,
     title: titleFilter,
     description: descriptionFilter,
+    status: statusFilter,
   });
 
   const tasks = useMemo(() => data?.items ?? [], [data?.items]);
@@ -55,6 +63,11 @@ export default function TaskTable() {
       value: description,
     }));
   }, [tasks, descriptionFilter]);
+  const statusFilters = useMemo(
+    () =>
+      TASK_STATUS_OPTIONS.map((status) => ({ text: status, value: status })),
+    [],
+  );
 
   const onEditOpen = (task: TaskRead) => {
     setEditingTask(task);
@@ -135,14 +148,21 @@ export default function TaskTable() {
       : extra.action === "filter"
         ? ""
         : descriptionFilter;
+    const nextStatusFilter = Array.isArray(filters.status)
+      ? ((filters.status[0] as TaskStatus) ?? undefined)
+      : extra.action === "filter"
+        ? undefined
+        : statusFilter;
 
     if (
       nextTitleFilter !== titleFilter ||
-      nextDescriptionFilter !== descriptionFilter
+      nextDescriptionFilter !== descriptionFilter ||
+      nextStatusFilter !== statusFilter
     ) {
       setCurrentPage(1);
       setTitleFilter(nextTitleFilter);
       setDescriptionFilter(nextDescriptionFilter);
+      setStatusFilter(nextStatusFilter);
     } else {
       setCurrentPage(nextPage);
     }
@@ -182,6 +202,7 @@ export default function TaskTable() {
             key: "title",
             filters: titleFilters,
             filteredValue: titleFilter ? [titleFilter] : null,
+            filterMultiple: false,
             filterSearch: true,
             sorter: (a, b) => a.title.localeCompare(b.title),
           },
@@ -191,6 +212,7 @@ export default function TaskTable() {
             key: "description",
             filters: descriptionFilters,
             filteredValue: descriptionFilter ? [descriptionFilter] : null,
+            filterMultiple: false,
             filterSearch: true,
             sorter: (a, b) =>
               a.description && b.description
@@ -201,6 +223,9 @@ export default function TaskTable() {
             title: "Status",
             dataIndex: "status",
             key: "status",
+            filters: statusFilters,
+            filteredValue: statusFilter ? [statusFilter] : null,
+            filterMultiple: false,
             render: (status: TaskRead["status"]) => {
               return (
                 <Tooltip title={status}>
