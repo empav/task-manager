@@ -1,7 +1,14 @@
 import { Button, Popconfirm, Table, Tooltip, message } from "antd";
+import type { TableProps } from "antd";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { ApiError, TaskCreate, TaskRead } from "../../types";
+import {
+  TASK_STATUS_OPTIONS,
+  type ApiError,
+  type TaskCreate,
+  type TaskRead,
+  type TaskStatus,
+} from "../../types";
 import {
   useCreateTaskMutation,
   useDeleteTaskMutation,
@@ -16,9 +23,15 @@ import { ICON_BY_STATUS, TASK_TABLE_PAGE_SIZE } from "../../utils/constants";
 export default function TaskTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(TASK_TABLE_PAGE_SIZE);
+  const [titleFilter, setTitleFilter] = useState<string>("");
+  const [descriptionFilter, setDescriptionFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<TaskStatus>();
   const { data, isLoading } = useListTasksPaginatedQuery({
     page: currentPage,
     pageSize,
+    title: titleFilter,
+    description: descriptionFilter,
+    status: statusFilter,
   });
 
   const tasks = useMemo(() => data?.items ?? [], [data?.items]);
@@ -33,28 +46,28 @@ export default function TaskTable() {
   const updateTaskMutation = useUpdateTaskMutation();
   const deleteTaskMutation = useDeleteTaskMutation();
 
-  const { titleFilters, descriptionFilters } = useMemo(() => {
-    const seenTitles = new Set<string>();
-    const seenDescriptions = new Set<string>();
-    const titleFiltersLocal: { text: string; value: string }[] = [];
-    const descriptionFiltersLocal: { text: string; value: string }[] = [];
-    for (const task of tasks) {
-      const title = task.title;
-      if (!seenTitles.has(title)) {
-        seenTitles.add(title);
-        titleFiltersLocal.push({ text: title, value: title });
-      }
-      const description = task.description;
-      if (description && !seenDescriptions.has(description)) {
-        seenDescriptions.add(description);
-        descriptionFiltersLocal.push({ text: description, value: description });
-      }
-    }
-    return {
-      titleFilters: titleFiltersLocal,
-      descriptionFilters: descriptionFiltersLocal,
-    };
-  }, [tasks]);
+  const titleFilters = useMemo(() => {
+    const titles = new Set(tasks.map((task) => task.title));
+    if (titleFilter) titles.add(titleFilter);
+    return Array.from(titles, (title) => ({ text: title, value: title }));
+  }, [tasks, titleFilter]);
+  const descriptionFilters = useMemo(() => {
+    const descriptions = new Set(
+      tasks
+        .map((task) => task.description)
+        .filter((description): description is string => Boolean(description)),
+    );
+    if (descriptionFilter) descriptions.add(descriptionFilter);
+    return Array.from(descriptions, (description) => ({
+      text: description,
+      value: description,
+    }));
+  }, [tasks, descriptionFilter]);
+  const statusFilters = useMemo(
+    () =>
+      TASK_STATUS_OPTIONS.map((status) => ({ text: status, value: status })),
+    [],
+  );
 
   const onEditOpen = (task: TaskRead) => {
     setEditingTask(task);
@@ -117,6 +130,45 @@ export default function TaskTable() {
     }
   };
 
+  const handleTableChange: TableProps<TaskRead>["onChange"] = (
+    pagination,
+    filters,
+    _sorter,
+    extra,
+  ) => {
+    const nextPage = pagination.current ?? 1;
+    const nextPageSize = pagination.pageSize ?? TASK_TABLE_PAGE_SIZE;
+    const nextTitleFilter = Array.isArray(filters.title)
+      ? ((filters.title[0] as string) ?? "")
+      : extra.action === "filter"
+        ? ""
+        : titleFilter;
+    const nextDescriptionFilter = Array.isArray(filters.description)
+      ? ((filters.description[0] as string) ?? "")
+      : extra.action === "filter"
+        ? ""
+        : descriptionFilter;
+    const nextStatusFilter = Array.isArray(filters.status)
+      ? ((filters.status[0] as TaskStatus) ?? undefined)
+      : extra.action === "filter"
+        ? undefined
+        : statusFilter;
+
+    if (
+      nextTitleFilter !== titleFilter ||
+      nextDescriptionFilter !== descriptionFilter ||
+      nextStatusFilter !== statusFilter
+    ) {
+      setCurrentPage(1);
+      setTitleFilter(nextTitleFilter);
+      setDescriptionFilter(nextDescriptionFilter);
+      setStatusFilter(nextStatusFilter);
+    } else {
+      setCurrentPage(nextPage);
+    }
+    setPageSize(nextPageSize);
+  };
+
   return (
     <>
       <UpsertTaskModal
@@ -149,8 +201,9 @@ export default function TaskTable() {
             dataIndex: "title",
             key: "title",
             filters: titleFilters,
+            filteredValue: titleFilter ? [titleFilter] : null,
+            filterMultiple: false,
             filterSearch: true,
-            onFilter: (value, record) => record.title.includes(value as string),
             sorter: (a, b) => a.title.localeCompare(b.title),
           },
           {
@@ -158,9 +211,9 @@ export default function TaskTable() {
             dataIndex: "description",
             key: "description",
             filters: descriptionFilters,
+            filteredValue: descriptionFilter ? [descriptionFilter] : null,
+            filterMultiple: false,
             filterSearch: true,
-            onFilter: (value, record) =>
-              record.description?.includes(value as string) ?? false,
             sorter: (a, b) =>
               a.description && b.description
                 ? a.description.localeCompare(b.description)
@@ -170,6 +223,9 @@ export default function TaskTable() {
             title: "Status",
             dataIndex: "status",
             key: "status",
+            filters: statusFilters,
+            filteredValue: statusFilter ? [statusFilter] : null,
+            filterMultiple: false,
             render: (status: TaskRead["status"]) => {
               return (
                 <Tooltip title={status}>
@@ -229,11 +285,9 @@ export default function TaskTable() {
           current: currentPage,
           pageSize,
           total,
-          onChange: (page, size) => {
-            setCurrentPage(page);
-            setPageSize(size);
-          },
+          showSizeChanger: true,
         }}
+        onChange={handleTableChange}
         showSorterTooltip={{ target: "sorter-icon" }}
       />
     </>

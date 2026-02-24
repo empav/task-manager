@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func
@@ -55,13 +55,24 @@ def list_tasks_v1(
 def list_tasks_v2(
     page: int = Query(1, ge=1),
     page_size: int = Query(5, ge=1, le=100),
+    title: Optional[str] = Query(default=None, min_length=1),
+    description: Optional[str] = Query(default=None, min_length=1),
+    status: Optional[str] = Query(default=None, min_length=1),
     session: Session = Depends(get_db),
 ) -> PaginatedTaskListResponse:
     offset = (page - 1) * page_size
-    query = select(TaskModel).order_by(TaskModel.id).offset(offset).limit(page_size)
-    tasks = session.exec(query).all()
-    total_query = select(func.count()).select_from(TaskModel)
-    total = session.exec(total_query).one()
+    total_count = func.count().over().label("total")
+    query = select(TaskModel, total_count).order_by(TaskModel.id)
+    if title:
+        query = query.where(TaskModel.title.contains(title))
+    if description:
+        query = query.where(TaskModel.description.contains(description))
+    if status:
+        query = query.where(TaskModel.status == status)
+    query = query.offset(offset).limit(page_size)
+    rows = session.exec(query).all()
+    total = int(rows[0].total) if rows else 0
+    tasks = [row[0] for row in rows]
     items = [
         TaskRead(
             id=task.id,
