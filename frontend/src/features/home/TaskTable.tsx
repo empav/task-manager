@@ -1,25 +1,29 @@
 import { Button, Popconfirm, Table, Tooltip, message } from "antd";
-import { useMemo, useState, type JSX } from "react";
+import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ApiError, TaskCreate, TaskRead } from "../../types";
 import {
   useCreateTaskMutation,
   useDeleteTaskMutation,
-  useListTasksQuery,
+  useListTasksPaginatedQuery,
   useUpdateTaskMutation,
 } from "../../hooks";
 import UpsertTaskModal from "./UpsertTaskModal";
-import { CheckCircle2, Circle, Clock, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import "./TaskTable.css";
-
-const ICON_BY_STATUS: Record<TaskRead["status"], JSX.Element> = {
-  Open: <Circle size={16} aria-hidden="true" />,
-  "In Progress": <Clock size={16} aria-hidden="true" color="orange" />,
-  Done: <CheckCircle2 size={16} aria-hidden="true" color="green" />,
-};
+import { ICON_BY_STATUS, TASK_TABLE_PAGE_SIZE } from "../../utils/constants";
 
 export default function TaskTable() {
-  const { data: tasks = [], isLoading } = useListTasksQuery();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(TASK_TABLE_PAGE_SIZE);
+  const { data, isLoading } = useListTasksPaginatedQuery({
+    page: currentPage,
+    pageSize,
+  });
+
+  const tasks = useMemo(() => data?.items ?? [], [data?.items]);
+  const total = data?.total ?? 0;
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskRead | null>(null);
@@ -221,7 +225,15 @@ export default function TaskTable() {
         rowKey="id"
         className="home-main-table"
         title={() => "Task List"}
-        pagination={{ pageSize: 5 }}
+        pagination={{
+          current: currentPage,
+          pageSize,
+          total,
+          onChange: (page, size) => {
+            setCurrentPage(page);
+            setPageSize(size);
+          },
+        }}
         showSorterTooltip={{ target: "sorter-icon" }}
       />
     </>

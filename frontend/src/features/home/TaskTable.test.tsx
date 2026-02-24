@@ -13,6 +13,13 @@ vi.mock("../../hooks", () => ({
   useCreateTaskMutation: () => createTaskMutationMock(),
   useUpdateTaskMutation: () => updateTaskMutationMock(),
   useDeleteTaskMutation: () => deleteTaskMutationMock(),
+  useListTasksPaginatedQuery: ({
+    page,
+    pageSize,
+  }: {
+    page: number;
+    pageSize: number;
+  }) => listTasksQueryMock({ page, pageSize }),
 }));
 
 vi.mock("@tanstack/react-query", () => ({
@@ -21,7 +28,10 @@ vi.mock("@tanstack/react-query", () => ({
 
 describe("TaskTable", () => {
   beforeEach(() => {
-    listTasksQueryMock.mockReturnValue({ data: [], isLoading: false });
+    listTasksQueryMock.mockReturnValue({
+      data: { items: [], total: 0 },
+      isLoading: false,
+    });
     createTaskMutationMock.mockReturnValue({
       mutateAsync: vi.fn(),
       isPending: false,
@@ -40,15 +50,18 @@ describe("TaskTable", () => {
 
   it("renders task rows when data is available", () => {
     listTasksQueryMock.mockReturnValue({
-      data: [
-        {
-          id: 1,
-          title: "Write tests",
-          description: "Cover TaskTable rendering",
-          status: "Done",
-          created_at: "2024-01-01T10:00:00.000Z",
-        },
-      ],
+      data: {
+        items: [
+          {
+            id: 1,
+            title: "Write tests",
+            description: "Cover TaskTable rendering",
+            status: "Done",
+            created_at: "2024-01-01T10:00:00.000Z",
+          },
+        ],
+        total: 1,
+      },
       isLoading: false,
     });
 
@@ -60,15 +73,18 @@ describe("TaskTable", () => {
 
   it("renders status labels for in-progress tasks", () => {
     listTasksQueryMock.mockReturnValue({
-      data: [
-        {
-          id: 2,
-          title: "Implement filters",
-          description: null,
-          status: "In Progress",
-          created_at: "2024-01-02T08:30:00.000Z",
-        },
-      ],
+      data: {
+        items: [
+          {
+            id: 2,
+            title: "Implement filters",
+            description: null,
+            status: "In Progress",
+            created_at: "2024-01-02T08:30:00.000Z",
+          },
+        ],
+        total: 1,
+      },
       isLoading: false,
     });
 

@@ -37,3 +37,13 @@ export type TaskRead = {
   created_at: string;
   updated_at: string;
 };
+
+export type PaginatedTaskListRequest = {
+  page: number;
+  pageSize: number;
+};
+
+export type PaginatedTaskListResponse = {
+  items: TaskRead[];
+  total: number;
+};

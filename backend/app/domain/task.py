@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated, List, Optional
 
 from pydantic import BaseModel, StringConstraints
 
@@ -26,3 +26,7 @@ class TaskRead(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+
+class PaginatedTaskListResponse(BaseModel):
+    items: List[TaskRead]
+    total: int

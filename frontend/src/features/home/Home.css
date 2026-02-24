@@ -18,3 +18,8 @@
 .home-main-table {
   width: 100%;
 }
+
+.home-main-table .ant-table-container {
+  max-height: calc(100vh - 20rem);
+  overflow-y: auto;
+}
