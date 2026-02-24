@@ -5,7 +5,7 @@ import type { TaskRead } from "../types";
 export const BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api";
 
-export const TASK_TABLE_PAGE_SIZE = 5;
+export const TASK_TABLE_PAGE_SIZE = 10;
 
 export const ICON_BY_STATUS: Record<TaskRead["status"], JSX.Element> = {
   Open: <Circle size={16} aria-hidden="true" />,

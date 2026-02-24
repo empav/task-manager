@@ -8,7 +8,7 @@ import type {
 
 export function useListTasksPaginatedQuery(params: PaginatedTaskListRequest) {
   return useQuery({
-    queryKey: ["tasks", params.page, params.pageSize],
+    queryKey: ["tasks", params.page, params.pageSize, params.title ?? ""],
     queryFn: () =>
       listTasksPaginated(params) as Promise<PaginatedTaskListResponse>,
   });

@@ -41,6 +41,7 @@ export type TaskRead = {
 export type PaginatedTaskListRequest = {
   page: number;
   pageSize: number;
+  title?: string;
 };
 
 export type PaginatedTaskListResponse = {

@@ -45,6 +45,9 @@ export async function listTasksPaginated(
     page: req.page.toString(),
     page_size: req.pageSize.toString(),
   });
+  if (req.title?.length) {
+    params.set("title", req.title);
+  }
   return requestJson<PaginatedTaskListResponse>(
     `/v2/tasks?${params.toString()}`,
   );

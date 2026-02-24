@@ -1,4 +1,5 @@
 import { Button, Popconfirm, Table, Tooltip, message } from "antd";
+import type { TableProps } from "antd";
 import { useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ApiError, TaskCreate, TaskRead } from "../../types";
@@ -16,9 +17,11 @@ import { ICON_BY_STATUS, TASK_TABLE_PAGE_SIZE } from "../../utils/constants";
 export default function TaskTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(TASK_TABLE_PAGE_SIZE);
+  const [titleFilter, setTitleFilter] = useState<string>("");
   const { data, isLoading } = useListTasksPaginatedQuery({
     page: currentPage,
     pageSize,
+    title: titleFilter,
   });
 
   const tasks = useMemo(() => data?.items ?? [], [data?.items]);
@@ -33,28 +36,11 @@ export default function TaskTable() {
   const updateTaskMutation = useUpdateTaskMutation();
   const deleteTaskMutation = useDeleteTaskMutation();
 
-  const { titleFilters, descriptionFilters } = useMemo(() => {
-    const seenTitles = new Set<string>();
-    const seenDescriptions = new Set<string>();
-    const titleFiltersLocal: { text: string; value: string }[] = [];
-    const descriptionFiltersLocal: { text: string; value: string }[] = [];
-    for (const task of tasks) {
-      const title = task.title;
-      if (!seenTitles.has(title)) {
-        seenTitles.add(title);
-        titleFiltersLocal.push({ text: title, value: title });
-      }
-      const description = task.description;
-      if (description && !seenDescriptions.has(description)) {
-        seenDescriptions.add(description);
-        descriptionFiltersLocal.push({ text: description, value: description });
-      }
-    }
-    return {
-      titleFilters: titleFiltersLocal,
-      descriptionFilters: descriptionFiltersLocal,
-    };
-  }, [tasks]);
+  const titleFilters = useMemo(() => {
+    const titles = new Set(tasks.map((task) => task.title));
+    if (titleFilter) titles.add(titleFilter);
+    return Array.from(titles, (title) => ({ text: title, value: title }));
+  }, [tasks, titleFilter]);
 
   const onEditOpen = (task: TaskRead) => {
     setEditingTask(task);
@@ -117,6 +103,29 @@ export default function TaskTable() {
     }
   };
 
+  const handleTableChange: TableProps<TaskRead>["onChange"] = (
+    pagination,
+    filters,
+    _sorter,
+    extra,
+  ) => {
+    const nextPage = pagination.current ?? 1;
+    const nextPageSize = pagination.pageSize ?? TASK_TABLE_PAGE_SIZE;
+    const nextTitleFilter = Array.isArray(filters.title)
+      ? ((filters.title[0] as string) ?? "")
+      : extra.action === "filter"
+        ? ""
+        : titleFilter;
+
+    if (nextTitleFilter !== titleFilter) {
+      setCurrentPage(1);
+      setTitleFilter(nextTitleFilter);
+    } else {
+      setCurrentPage(nextPage);
+    }
+    setPageSize(nextPageSize);
+  };
+
   return (
     <>
       <UpsertTaskModal
@@ -149,18 +158,14 @@ export default function TaskTable() {
             dataIndex: "title",
             key: "title",
             filters: titleFilters,
+            filteredValue: titleFilter ? [titleFilter] : null,
             filterSearch: true,
-            onFilter: (value, record) => record.title.includes(value as string),
             sorter: (a, b) => a.title.localeCompare(b.title),
           },
           {
             title: "Description",
             dataIndex: "description",
             key: "description",
-            filters: descriptionFilters,
-            filterSearch: true,
-            onFilter: (value, record) =>
-              record.description?.includes(value as string) ?? false,
             sorter: (a, b) =>
               a.description && b.description
                 ? a.description.localeCompare(b.description)
@@ -229,11 +234,9 @@ export default function TaskTable() {
           current: currentPage,
           pageSize,
           total,
-          onChange: (page, size) => {
-            setCurrentPage(page);
-            setPageSize(size);
-          },
+          showSizeChanger: true,
         }}
+        onChange={handleTableChange}
         showSorterTooltip={{ target: "sorter-icon" }}
       />
     </>
