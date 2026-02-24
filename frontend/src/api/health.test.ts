@@ -19,7 +19,9 @@ describe("health", () => {
     const result = await health();
 
     expect(result).toBe(true);
-    expect(mockFetch).toHaveBeenCalledWith("http://localhost:8000/health");
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:8000/api/v1/health",
+    );
   });
 
   it("should throw an error when fetch fails", async () => {

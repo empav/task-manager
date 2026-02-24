@@ -8,7 +8,8 @@ from sqlmodel import Session, select
 from ..db import get_db
 from ..domain.task import TaskCreate, TaskRead, TaskUpdate
 from ..models.task import Task as TaskModel
-router = APIRouter()
+
+router_v1 = APIRouter()
 
 def get_task_or_404(session: Session, task_id: int) -> TaskModel:
     task = session.get(TaskModel, task_id)
@@ -19,7 +20,7 @@ def get_task_or_404(session: Session, task_id: int) -> TaskModel:
     return task
 
 
-@router.post(
+@router_v1.post(
     "/tasks",
     response_model=TaskRead,
     status_code=status.HTTP_201_CREATED,
@@ -40,8 +41,8 @@ def create_task(payload: TaskCreate, session: Session = Depends(get_db)) -> Task
     return task
 
 
-@router.get("/tasks", response_model=List[TaskRead], tags=["tasks"])
-def list_tasks(
+@router_v1.get("/tasks", response_model=List[TaskRead], tags=["tasks"])
+def list_tasks_v1(
     session: Session = Depends(get_db),
 ) -> List[TaskModel]:
     query = select(TaskModel)
@@ -49,14 +50,14 @@ def list_tasks(
     return tasks
 
 
-@router.get("/tasks/count", response_model=int, tags=["tasks"])
+@router_v1.get("/tasks/count", response_model=int, tags=["tasks"])
 def count_tasks(session: Session = Depends(get_db)) -> int:
     query = select(func.count()).select_from(TaskModel)
     count = session.exec(query).one()
     return int(count)
 
 
-@router.get("/tasks/{task_id}", response_model=TaskRead, tags=["tasks"])
+@router_v1.get("/tasks/{task_id}", response_model=TaskRead, tags=["tasks"])
 def get_task(task_id: int, session: Session = Depends(get_db)) -> TaskModel:
     return get_task_or_404(session, task_id)
 
@@ -72,7 +73,7 @@ def apply_update(task: TaskModel, payload: TaskUpdate) -> TaskModel:
     return task
 
 
-@router.patch("/tasks/{task_id}", response_model=TaskRead, tags=["tasks"])
+@router_v1.patch("/tasks/{task_id}", response_model=TaskRead, tags=["tasks"])
 def patch_task(
     task_id: int, payload: TaskUpdate, session: Session = Depends(get_db)
 ) -> TaskModel:
@@ -84,7 +85,7 @@ def patch_task(
     return task
 
 
-@router.delete(
+@router_v1.delete(
     "/tasks/{task_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     tags=["tasks"],

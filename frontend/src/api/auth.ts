@@ -7,7 +7,7 @@ export async function login(request: LoginRequest): Promise<LoginResponse> {
   const encodedPassword = await encodePassword(request.password);
   const payload = { ...request, password: encodedPassword };
 
-  const res = await fetch(`${BASE_URL}/auth/login`, {
+  const res = await fetch(`${BASE_URL}/api/v1/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

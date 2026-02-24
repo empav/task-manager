@@ -36,7 +36,7 @@ describe("login", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
     const [url, options] = fetchMock.mock.calls[0] ?? [];
-    expect(url).toBe("http://localhost:8000/auth/login");
+    expect(url).toBe("http://localhost:8000/api/v1/auth/login");
     expect(options).toMatchObject({
       method: "POST",
       headers: { "Content-Type": "application/json" },
