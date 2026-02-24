@@ -4,3 +4,4 @@ python-jose[cryptography]
 sqlmodel
 python-dotenv
 psycopg2-binary
+json-log-formatter

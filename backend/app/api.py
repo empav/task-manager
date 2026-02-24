@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from . import logging as _logging
 from .routers import auth, health, tasks
 from .handlers import register_exception_handlers
 from .lifespan import lifespan
