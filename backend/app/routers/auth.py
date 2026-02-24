@@ -53,3 +53,18 @@ async def login(
     return LoginResponse(
         token=token,
     )
+
+
+@router.post("/auth/logout", status_code=status.HTTP_200_OK, tags=["auth"])
+async def logout(
+    background_tasks: BackgroundTasks,
+) -> None:
+    background_tasks.add_task(
+        write_audit_log,
+        AuditAction.LOGOUT,
+        actor=AUTH_USERNAME,
+        payload={
+            "description": "User logged out",
+        },
+    )
+    return None

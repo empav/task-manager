@@ -6,3 +6,4 @@ class AuditAction(str, Enum):
     TASK_UPDATED = "task_updated"
     TASK_DELETED = "task_deleted"
     LOGIN = "login"
+    LOGOUT = "logout"
