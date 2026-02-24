@@ -42,6 +42,7 @@ export type PaginatedTaskListRequest = {
   page: number;
   pageSize: number;
   title?: string;
+  description?: string;
 };
 
 export type PaginatedTaskListResponse = {

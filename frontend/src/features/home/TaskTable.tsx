@@ -18,10 +18,12 @@ export default function TaskTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(TASK_TABLE_PAGE_SIZE);
   const [titleFilter, setTitleFilter] = useState<string>("");
+  const [descriptionFilter, setDescriptionFilter] = useState<string>("");
   const { data, isLoading } = useListTasksPaginatedQuery({
     page: currentPage,
     pageSize,
     title: titleFilter,
+    description: descriptionFilter,
   });
 
   const tasks = useMemo(() => data?.items ?? [], [data?.items]);
@@ -41,6 +43,18 @@ export default function TaskTable() {
     if (titleFilter) titles.add(titleFilter);
     return Array.from(titles, (title) => ({ text: title, value: title }));
   }, [tasks, titleFilter]);
+  const descriptionFilters = useMemo(() => {
+    const descriptions = new Set(
+      tasks
+        .map((task) => task.description)
+        .filter((description): description is string => Boolean(description)),
+    );
+    if (descriptionFilter) descriptions.add(descriptionFilter);
+    return Array.from(descriptions, (description) => ({
+      text: description,
+      value: description,
+    }));
+  }, [tasks, descriptionFilter]);
 
   const onEditOpen = (task: TaskRead) => {
     setEditingTask(task);
@@ -116,10 +130,19 @@ export default function TaskTable() {
       : extra.action === "filter"
         ? ""
         : titleFilter;
+    const nextDescriptionFilter = Array.isArray(filters.description)
+      ? ((filters.description[0] as string) ?? "")
+      : extra.action === "filter"
+        ? ""
+        : descriptionFilter;
 
-    if (nextTitleFilter !== titleFilter) {
+    if (
+      nextTitleFilter !== titleFilter ||
+      nextDescriptionFilter !== descriptionFilter
+    ) {
       setCurrentPage(1);
       setTitleFilter(nextTitleFilter);
+      setDescriptionFilter(nextDescriptionFilter);
     } else {
       setCurrentPage(nextPage);
     }
@@ -166,6 +189,9 @@ export default function TaskTable() {
             title: "Description",
             dataIndex: "description",
             key: "description",
+            filters: descriptionFilters,
+            filteredValue: descriptionFilter ? [descriptionFilter] : null,
+            filterSearch: true,
             sorter: (a, b) =>
               a.description && b.description
                 ? a.description.localeCompare(b.description)
