@@ -47,9 +47,12 @@ export default function LoginPage() {
         <Space orientation="vertical" size="large" className="login-space">
           <div>
             <Typography.Title level={3} className="login-title">
-              Sign in
+              Task Manager
             </Typography.Title>
-            <Typography.Text type="secondary">
+            <Typography.Text
+              type="secondary"
+              className="login-enter-credentials"
+            >
               Enter your credentials
             </Typography.Text>
           </div>
@@ -85,6 +88,15 @@ export default function LoginPage() {
             >
               Sign in
             </Button>
+            <Typography.Text type="secondary" className="login-api-docs">
+              <a
+                href="http://localhost:8000/docs"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View API docs
+              </a>
+            </Typography.Text>
           </Form>
         </Space>
       </Card>

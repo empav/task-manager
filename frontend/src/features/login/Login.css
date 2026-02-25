@@ -13,6 +13,13 @@
   width: 100%;
 }
 
-.login-title {
-  margin-bottom: 4px;
+.login-title,
+.login-enter-credentials,
+.login-api-docs {
+  display: flex;
+  justify-content: center;
+}
+
+.login-api-docs {
+  margin-block-start: 1rem;
 }

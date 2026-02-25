@@ -8,7 +8,14 @@ from .handlers import register_exception_handlers
 from .lifespan import lifespan
 from .middleware import audit_http_requests
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="Task Manager APIs",
+    version="1.0.0",
+    description="REST API for tasks with mocked JWT auth",
+    docs_url="/docs",
+    lifespan=lifespan
+    )
+
 register_exception_handlers(app)
 
 Instrumentator(
