@@ -112,10 +112,9 @@ Assumptions:
 
 Possible improvements:
 
-- Improve FE bundle size using dynamic import() to code-split the application.
 - Secure APIs validating token from request headers.
 - Enhance authentication using a user table in the database or possibly adding social login using OAuth2.
 - At the moment db migrations are not handled cause there's only one table. Evaluate another framework in place of `sqlmodel` to handle them.
-- Add API documentation (OpenAPI/Swagger).
+- Improve FE bundle size using dynamic import() to code-split the application.
 - Add production build instructions and deployment manifests.
 - Add integration tests in the backend against a db in memory like sqlLite or similar.
