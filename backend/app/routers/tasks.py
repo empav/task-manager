@@ -90,18 +90,20 @@ def list_tasks_v2(
 ) -> PaginatedTaskListResponse:
     start_time = time.perf_counter()
     offset = (page - 1) * page_size
-    total_count = func.count().over().label("total")
-    query = select(TaskModel, total_count).order_by(TaskModel.id)
+    query = select(TaskModel).order_by(TaskModel.id)
+    count_query = select(func.count()).select_from(TaskModel)
     if title:
         query = query.where(TaskModel.title.contains(title))
+        count_query = count_query.where(TaskModel.title.contains(title))
     if description:
         query = query.where(TaskModel.description.contains(description))
+        count_query = count_query.where(TaskModel.description.contains(description))
     if status:
         query = query.where(TaskModel.status == status)
+        count_query = count_query.where(TaskModel.status == status)
     query = query.offset(offset).limit(page_size)
-    rows = session.exec(query).all()
-    total = int(rows[0].total) if rows else 0
-    tasks = [row[0] for row in rows]
+    tasks = session.exec(query).all()
+    total = int(session.exec(count_query).one())
     items = [
         TaskRead(
             id=task.id,
