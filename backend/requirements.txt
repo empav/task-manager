@@ -5,3 +5,4 @@ sqlmodel
 python-dotenv
 psycopg2-binary
 json-log-formatter
+prometheus-fastapi-instrumentator

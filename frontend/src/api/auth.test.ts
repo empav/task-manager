@@ -54,14 +54,14 @@ describe("login", () => {
     fetchMock.mockResolvedValue({
       ok: false,
       status: 401,
-      json: vi.fn().mockResolvedValue({ message: "Invalid credentials" }),
+      json: vi.fn().mockResolvedValue({ message: ["Login failed"] }),
     });
 
     const request = { username: "alice", password: "wrong" };
 
     await expect(login(request)).rejects.toEqual({
       status_code: 401,
-      message: "Invalid credentials",
+      message: ["Login failed"],
     });
   });
 });

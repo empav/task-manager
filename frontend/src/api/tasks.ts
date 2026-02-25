@@ -28,7 +28,7 @@ async function requestJson<T>(path: string, options?: RequestInit): Promise<T> {
   throw {
     status_code: res.status,
     message: payload?.message ?? ["An unexpected error occurred."],
-  };
+  } as ApiError;
 }
 
 export async function createTask(payload: TaskCreate): Promise<TaskRead> {
@@ -96,7 +96,7 @@ export async function deleteTask(taskId: number): Promise<void> {
   throw {
     status_code: res.status,
     message: payload?.message ?? ["An unexpected error occurred."],
-  };
+  } as ApiError;
 }
 
 export async function countTasks(): Promise<number> {

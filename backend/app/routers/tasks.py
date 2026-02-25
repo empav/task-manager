@@ -1,4 +1,5 @@
 from datetime import datetime
+import time
 from typing import List, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
@@ -10,6 +11,12 @@ from ..config import AUTH_USERNAME
 from ..db import get_db
 from ..domain.task import TaskCreate, PaginatedTaskListResponse, TaskRead, TaskUpdate
 from ..domain.audit import AuditAction
+from ..metrics import (
+    LIST_TASKS_V2_AVG_RESPONSE_TIME_SECONDS,
+    TASKS_CREATED_TOTAL,
+    TASKS_DELETED_TOTAL,
+    TASK_UPDATED_TOTAL,
+)
 from ..models.task import Task as TaskModel
 
 router_v1 = APIRouter()
@@ -47,6 +54,7 @@ def create_task(
     session.add(task)
     session.commit()
     session.refresh(task)
+    TASKS_CREATED_TOTAL.inc()
     
     background_tasks.add_task(
         write_audit_log,
@@ -80,6 +88,7 @@ def list_tasks_v2(
     status: Optional[str] = Query(default=None, min_length=1),
     session: Session = Depends(get_db),
 ) -> PaginatedTaskListResponse:
+    start_time = time.perf_counter()
     offset = (page - 1) * page_size
     total_count = func.count().over().label("total")
     query = select(TaskModel, total_count).order_by(TaskModel.id)
@@ -104,7 +113,9 @@ def list_tasks_v2(
         )
         for task in tasks
     ]
-    return PaginatedTaskListResponse(items=items, total=int(total))
+    response = PaginatedTaskListResponse(items=items, total=int(total))
+    LIST_TASKS_V2_AVG_RESPONSE_TIME_SECONDS.observe(time.perf_counter() - start_time)
+    return response
 
 
 @router_v1.get("/tasks/count", response_model=int, tags=["tasks"])
@@ -142,6 +153,7 @@ def patch_task(
     session.add(task)
     session.commit()
     session.refresh(task)
+    TASK_UPDATED_TOTAL.inc()
     background_tasks.add_task(
         write_audit_log,
         AuditAction.TASK_UPDATED,
@@ -169,6 +181,7 @@ def delete_task(
     task = get_task_or_404(session, task_id)
     session.delete(task)
     session.commit()
+    TASKS_DELETED_TOTAL.inc()
     background_tasks.add_task(
         write_audit_log,
         AuditAction.TASK_DELETED,

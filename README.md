@@ -115,7 +115,6 @@ Possible improvements:
 - Improve FE bundle size using dynamic import() to code-split the application.
 - Secure APIs validating token from request headers.
 - Enhance authentication using a user table in the database or possibly adding social login using OAuth2.
-- Add pagination, filtering, and search server-side. At the moment those are handled by ant design by client-side.
 - At the moment db migrations are not handled cause there's only one table. Evaluate another framework in place of `sqlmodel` to handle them.
 - Add API documentation (OpenAPI/Swagger).
 - Add production build instructions and deployment manifests.

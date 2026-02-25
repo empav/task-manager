@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import TaskTable from "./TaskTable";
 import Title from "./Title";
+import Metrics from "./Metrics";
 import "./Home.css";
 import { useCountTasksQuery } from "../../hooks";
 
@@ -25,7 +26,14 @@ export default function Home() {
         <>
           <Header />
           <Layout.Content className="home-main">
-            {taskCount === 0 ? <Title taskCount={taskCount} /> : <TaskTable />}
+            {taskCount === 0 ? (
+              <Title taskCount={taskCount} />
+            ) : (
+              <>
+                <Metrics />
+                <TaskTable />
+              </>
+            )}
           </Layout.Content>
         </>
       ) : null}

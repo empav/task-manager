@@ -1,5 +1,6 @@
 import logging
 
+from app.metrics import FAILED_LOGIN_TOTAL
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -27,6 +28,7 @@ def register_exception_handlers(app: FastAPI) -> None:
     async def validation_exception_handler(
         _request: Request, exc: RequestValidationError
     ):
+        FAILED_LOGIN_TOTAL.inc()
         messages = [error.get("msg", "Invalid request") for error in exc.errors()]
         payload = ApiError(message=messages, status_code=422)
         content = payload.model_dump()

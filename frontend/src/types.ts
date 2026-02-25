@@ -50,3 +50,13 @@ export type PaginatedTaskListResponse = {
   items: TaskRead[];
   total: number;
 };
+
+export type Metrics = {
+  tasks_created_total: number;
+  tasks_deleted_total: number;
+  task_updated_total: number;
+  attempt_login_total: number;
+  attempt_logout_total: number;
+  failed_login_total: number;
+  list_tasks_v2_avg_response_time_seconds: number;
+};

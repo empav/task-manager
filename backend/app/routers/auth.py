@@ -11,6 +11,7 @@ from ..config import (
 from ..audit import write_audit_log
 from ..domain.audit import AuditAction
 from ..domain.auth import LoginRequest, LoginResponse
+from ..metrics import ATTEMPT_LOGIN_TOTAL, ATTEMPT_LOGOUT_TOTAL, FAILED_LOGIN_TOTAL
 
 router = APIRouter()
 
@@ -30,10 +31,12 @@ async def login(
     payload: LoginRequest,
     background_tasks: BackgroundTasks,
 ) -> LoginResponse:
+    ATTEMPT_LOGIN_TOTAL.inc()
     if not (
         hmac.compare_digest(payload.username, AUTH_USERNAME)
         and hmac.compare_digest(payload.password, AUTH_PASSWORD_HASH)
     ):
+        FAILED_LOGIN_TOTAL.inc()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
@@ -59,6 +62,7 @@ async def login(
 async def logout(
     background_tasks: BackgroundTasks,
 ) -> None:
+    ATTEMPT_LOGOUT_TOTAL.inc()
     background_tasks.add_task(
         write_audit_log,
         AuditAction.LOGOUT,

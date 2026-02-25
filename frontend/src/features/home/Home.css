@@ -20,6 +20,6 @@
 }
 
 .home-main-table .ant-table-container {
-  max-height: calc(100vh - 20rem);
+  height: calc(100vh - 40rem);
   overflow-y: auto;
 }

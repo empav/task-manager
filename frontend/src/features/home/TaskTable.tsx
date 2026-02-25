@@ -85,6 +85,7 @@ export default function TaskTable() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["tasks"] }),
         queryClient.invalidateQueries({ queryKey: ["tasks", "count"] }),
+        queryClient.invalidateQueries({ queryKey: ["metrics"] }),
       ]);
       message.success("Task created");
       setIsCreateModalOpen(false);
@@ -103,7 +104,10 @@ export default function TaskTable() {
         taskId: editingTask.id,
         payload: values,
       });
-      await queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+        queryClient.invalidateQueries({ queryKey: ["metrics"] }),
+      ]);
       message.success("Task updated");
       onEditCancel();
     } catch (err) {
@@ -120,6 +124,7 @@ export default function TaskTable() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["tasks"] }),
         queryClient.invalidateQueries({ queryKey: ["tasks", "count"] }),
+        queryClient.invalidateQueries({ queryKey: ["metrics"] }),
       ]);
       message.success("Task deleted");
     } catch (err) {
@@ -130,7 +135,7 @@ export default function TaskTable() {
     }
   };
 
-  const handleTableChange: TableProps<TaskRead>["onChange"] = (
+  const handleTableChange: TableProps<TaskRead>["onChange"] = async (
     pagination,
     filters,
     _sorter,
@@ -167,6 +172,8 @@ export default function TaskTable() {
       setCurrentPage(nextPage);
     }
     setPageSize(nextPageSize);
+
+    await queryClient.invalidateQueries({ queryKey: ["metrics"] });
   };
 
   return (
@@ -286,6 +293,7 @@ export default function TaskTable() {
           pageSize,
           total,
           showSizeChanger: true,
+          showTotal: (total) => `${total} task${total > 1 ? "s" : ""}`,
         }}
         onChange={handleTableChange}
         showSorterTooltip={{ target: "sorter-icon" }}

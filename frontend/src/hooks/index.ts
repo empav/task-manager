@@ -7,3 +7,4 @@ export * from "./useListTasksQuery";
 export * from "./useListTasksPaginatedQuery";
 export * from "./useGetTaskQuery";
 export * from "./useCountTasksQuery";
+export * from "./useMetricsQuery";
