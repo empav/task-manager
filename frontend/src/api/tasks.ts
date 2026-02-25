@@ -8,13 +8,25 @@ import type {
 } from "../types";
 import { BASE_URL } from "../utils/constants";
 
+function buildAuthHeaders(): Record<string, string> {
+  const token = sessionStorage.getItem("auth_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function requestJson<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...buildAuthHeaders(),
+      ...(options?.headers ?? {}),
+    },
     ...options,
   });
 
   if (res.ok) {
+    if (res.status === 204) {
+      return undefined as T;
+    }
     return (await res.json()) as T;
   }
 
@@ -78,25 +90,9 @@ export async function updateTask(
 }
 
 export async function deleteTask(taskId: number): Promise<void> {
-  const res = await fetch(`${BASE_URL}/v1/tasks/${taskId}`, {
+  await requestJson<void>(`/v1/tasks/${taskId}`, {
     method: "DELETE",
   });
-
-  if (res.ok) {
-    return;
-  }
-
-  let payload: ApiError | null = null;
-  try {
-    payload = (await res.json()) as ApiError;
-  } catch {
-    payload = null;
-  }
-
-  throw {
-    status_code: res.status,
-    message: payload?.message ?? ["An unexpected error occurred."],
-  } as ApiError;
 }
 
 export async function countTasks(): Promise<number> {

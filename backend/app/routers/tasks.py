@@ -18,9 +18,10 @@ from ..metrics import (
     TASK_UPDATED_TOTAL,
 )
 from ..models.task import Task as TaskModel
+from ..security import get_current_user
 
-router_v1 = APIRouter()
-router_v2 = APIRouter()
+router_v1 = APIRouter(dependencies=[Depends(get_current_user)])
+router_v2 = APIRouter(dependencies=[Depends(get_current_user)])
 
 
 def get_task_or_404(session: Session, task_id: int) -> TaskModel:
