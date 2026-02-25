@@ -2,7 +2,6 @@ import logo from "../../assets/logo.svg";
 import { useHealthQuery } from "../../hooks";
 import { Avatar, Badge, Button, Layout, Space, Spin, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { logout } from "../../api/auth";
 
 import "./Header.css";
@@ -11,14 +10,11 @@ export default function Header() {
   const navigate = useNavigate();
   const { status, data, error } = useHealthQuery();
 
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    Boolean(sessionStorage.getItem("auth_token")),
-  );
+  const isAuthenticated = Boolean(sessionStorage.getItem("auth_token"));
 
   const onLogout = async () => {
     await logout();
     sessionStorage.removeItem("auth_token");
-    setIsAuthenticated(false);
     navigate("/login", { replace: true });
   };
 

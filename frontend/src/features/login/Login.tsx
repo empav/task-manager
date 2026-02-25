@@ -23,7 +23,7 @@ export default function LoginPage() {
   useEffect(() => {
     const existingToken = sessionStorage.getItem("auth_token");
     if (existingToken) {
-      navigate("/home", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [navigate]);
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
       sessionStorage.setItem("auth_token", data.token);
       message.success("Login successful");
       form.resetFields(["password"]);
-      navigate("/home", { replace: true });
+      navigate("/", { replace: true });
     } catch (err) {
       console.error("Login error:", err);
       const error = err as ApiError;
